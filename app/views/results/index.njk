@@ -65,10 +65,10 @@
                   distance: trainingLocation.distance,
                   address: trainingLocation.address
                 } if trainingLocation and isUniversity and isLocationSearch,
-                accreditedBody: course.accredited_body,
-                studyType: course.study_mode | getStudyModeLabel,
+                accreditedBody: course.trainingProvider.name,
+                studyType: course.studyMode | getStudyModeLabel,
                 qualification: course.qualification | getQualificationLabel('html') | safe,
-                fundingOption: course.fundingType,
+                fundingOption: course.funding_option,
                 degreeGrade: course.degreeGrade,
                 visaSponsorship: course.visaSponsorship
               }) }}
@@ -79,10 +79,6 @@
         {% if pagination %}
           {% include "./_pagination.njk" %}
         {% endif %}
-
-        {# {% if pagination.pages > 1 %}
-          {{ appPagination( pagination ) }}
-        {% endif %} #}
 
       {% else %}
 
