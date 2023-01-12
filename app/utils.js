@@ -140,6 +140,19 @@ module.exports = () => {
         course.degreeGrade = 'not_required'
     }
 
+    // Visa sponsorship
+    course.visaSponsorship = {
+      canSponsorSkilledWorkerVisa: false,
+      canSponsorStudentVisa: false
+    }
+
+    if (course.canSponsorSkilledWorkerVisa === 'yes') {
+      course.visaSponsorship.canSponsorSkilledWorkerVisa = true
+    }
+
+    if (course.canSponsorStudentVisa === 'yes') {
+      course.visaSponsorship.canSponsorStudentVisa = true
+    }
 
     // Year range
     course.year_range = `${data.cycle} to ${Number(data.cycle) + 1}`
