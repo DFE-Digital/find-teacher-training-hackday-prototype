@@ -5,6 +5,7 @@ const geolib = require('geolib')
 const teacherTrainingService = require('../services/teacher-training')
 const utils = require('../utils')()
 
+const paginationHelper = require('../helpers/pagination')
 const utilsHelper = require('../helpers/utils')
 
 exports.closed = async (req, res) => {
@@ -335,15 +336,15 @@ exports.list = async (req, res) => {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#schema-coursefilter
   const filter = {
     findable: true,
-    qualification: selectedQualification.toString(),
-    study_type: selectedStudyMode.toString(),
-    subjects: selectedSubject.toString()
+    qualification: selectedQualification,
+    study_type: selectedStudyMode,
+    subjects: selectedSubject
   }
 
   if (selectedFundingType[0] === 'include') {
-    filter.funding_type = 'salary'
+    filter.funding_type = ['salary']
   } else {
-    filter.funding_type = selectedFundingType.toString()
+    filter.funding_type = selectedFundingType
   }
 
   // TODO: move provider_type into filter
@@ -351,11 +352,11 @@ exports.list = async (req, res) => {
 
   // TODO: change the degreeGrade filter from radio to checkbox to manage grades properly
   if (selectedDegreeGrade === 'two_two') {
-    filter.degree_grade = 'two_two,third_class,not_required'
+    filter.degree_grade = ['two_two','third_class','not_required']
   } else if (selectedDegreeGrade === 'third_class') {
-    filter.degree_grade = 'third_class,not_required'
+    filter.degree_grade = ['third_class','not_required']
   } else if (selectedDegreeGrade === 'not_required') {
-    filter.degree_grade = 'not_required'
+    filter.degree_grade = ['not_required']
   }
 
   if (selectedSend[0] === 'include') {
@@ -385,166 +386,178 @@ exports.list = async (req, res) => {
 
   const hasSearchPhysics = !!(selectedSubjects.find(subject => subject.text === 'Physics'))
   try {
-    let CourseListResponse
+    let courseListResponse
 
     if (q === 'provider') {
-      CourseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, page, perPage, sortBy)
+      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, page, perPage, sortBy)
     } else if (q === 'location') {
       if (radius) {
         filter.latitude = latitude
         filter.longitude = longitude
         filter.radius = radius
       }
-      CourseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sortBy)
+      courseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sortBy)
     } else {
       // England-wide search
-      CourseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sortBy)
+      courseListResponse = await teacherTrainingService.getCourses(filter, sort)
     }
 
-    const { data, links, meta, included } = CourseListResponse
+    // const { data, links, meta, included } = courseListResponse
 
-    let courses = data
+    let courses = courseListResponse
+
     if (courses.length > 0) {
-      const providers = included.filter(include => include.type === 'providers')
 
-      courses = courses.map(async courseResource => {
-        const course = utils.decorateCourse(courseResource.attributes)
-        const courseRalationships = courseResource.relationships
+      // decorate provider
+      // const provider = await teacherTrainingService.getProvider()
+      // course.provider = provider
 
-        // Get course provider
-        const providerId = courseRalationships.provider.data.id
-        const providerResource = providers.find(providerResource => providerResource.id === providerId)
-        const provider = utils.decorateProvider(providerResource.attributes)
-
-        // Get course accredited body
-        if (courseRalationships.accredited_body.data) {
-          const accreditedBodyId = courseRalationships.accredited_body.data.id
-          const accreditedBody = providers.find(providerResource => providerResource.id === accreditedBodyId)
-          course.accredited_body = accreditedBody.attributes.name
-        }
-
-        // Get locations
-        const LocationListResponse = await teacherTrainingService.getCourseLocations(provider.code, course.code)
-        const statuses = LocationListResponse.included.filter(item => item.type === 'location_statuses')
-        const locations = LocationListResponse.data.map(location => {
-          const { attributes } = location
-
-          // Vacancy status
-          const statusId = location.relationships.location_status.data.id
-          const status = statuses.find(status => status.id === statusId)
-          attributes.has_vacancies = status.attributes.has_vacancies
-
-          // Address
-          const streetAddress1 = attributes.street_address_1 ? attributes.street_address_1 + ', ' : ''
-          const streetAddress2 = attributes.street_address_2 ? attributes.street_address_2 + ', ' : ''
-          const city = attributes.city ? attributes.city + ', ' : ''
-          const county = attributes.county ? attributes.county + ', ' : ''
-          const postcode = attributes.postcode
-
-          attributes.name = attributes.name.replace(/'/g, '’')
-          attributes.address = `${streetAddress1}${streetAddress2}${city}${county}${postcode}`
-
-          // Distance from search location
-          if (q === 'location') {
-            let distanceInMeters = 0
-            // if there's an error in the location details, we need to ignore
-            if (attributes.latitude !== null && attributes.longitude !== null) {
-              distanceInMeters = geolib.getDistance({
-                latitude,
-                longitude
-              }, {
-                latitude: attributes.latitude,
-                longitude: attributes.longitude
-              })
-            }
-
-            const distanceInMiles = ((parseInt(distanceInMeters) / 1000) * 0.621371).toFixed(0)
-            attributes.distance = parseInt(distanceInMiles)
-          }
-
-          return attributes
-        })
-
-        // Sort locations by disance
-        locations.sort((a, b) => {
-          return a.distance - b.distance
-        })
-
-        // Set course visa sponsorship based on provider
-        course.visaSponsorship = {}
-        course.visaSponsorship.canSponsorSkilledWorkerVisa = course.can_sponsor_skilled_worker_visa
-        course.visaSponsorship.canSponsorStudentVisa = course.can_sponsor_student_visa
-
-        const schools = locations.filter(location => location.code !== '-')
-
-        course.trainingLocation = locations.find(location => location.code === '-')
-
-        return {
-          course,
-          provider,
-          schools
-        }
-      })
     }
+
+    // if (courses.length > 0) {
+    //   const providers = included.filter(include => include.type === 'providers')
+    //
+    //   courses = courses.map(async courseResource => {
+    //     const course = utils.decorateCourse(courseResource.attributes)
+    //     const courseRalationships = courseResource.relationships
+    //
+    //     // Get course provider
+    //     const providerId = courseRalationships.provider.data.id
+    //     const providerResource = providers.find(providerResource => providerResource.id === providerId)
+    //     const provider = utils.decorateProvider(providerResource.attributes)
+    //
+    //     // Get course accredited body
+    //     if (courseRalationships.accredited_body.data) {
+    //       const accreditedBodyId = courseRalationships.accredited_body.data.id
+    //       const accreditedBody = providers.find(providerResource => providerResource.id === accreditedBodyId)
+    //       course.accredited_body = accreditedBody.attributes.name
+    //     }
+    //
+    //     // Get locations
+    //     const LocationListResponse = await teacherTrainingService.getCourseLocations(provider.code, course.code)
+    //     const statuses = LocationListResponse.included.filter(item => item.type === 'location_statuses')
+    //     const locations = LocationListResponse.data.map(location => {
+    //       const { attributes } = location
+    //
+    //       // Vacancy status
+    //       const statusId = location.relationships.location_status.data.id
+    //       const status = statuses.find(status => status.id === statusId)
+    //       attributes.has_vacancies = status.attributes.has_vacancies
+    //
+    //       // Address
+    //       const streetAddress1 = attributes.street_address_1 ? attributes.street_address_1 + ', ' : ''
+    //       const streetAddress2 = attributes.street_address_2 ? attributes.street_address_2 + ', ' : ''
+    //       const city = attributes.city ? attributes.city + ', ' : ''
+    //       const county = attributes.county ? attributes.county + ', ' : ''
+    //       const postcode = attributes.postcode
+    //
+    //       attributes.name = attributes.name.replace(/'/g, '’')
+    //       attributes.address = `${streetAddress1}${streetAddress2}${city}${county}${postcode}`
+    //
+    //       // Distance from search location
+    //       if (q === 'location') {
+    //         let distanceInMeters = 0
+    //         // if there's an error in the location details, we need to ignore
+    //         if (attributes.latitude !== null && attributes.longitude !== null) {
+    //           distanceInMeters = geolib.getDistance({
+    //             latitude,
+    //             longitude
+    //           }, {
+    //             latitude: attributes.latitude,
+    //             longitude: attributes.longitude
+    //           })
+    //         }
+    //
+    //         const distanceInMiles = ((parseInt(distanceInMeters) / 1000) * 0.621371).toFixed(0)
+    //         attributes.distance = parseInt(distanceInMiles)
+    //       }
+    //
+    //       return attributes
+    //     })
+    //
+    //     // Sort locations by disance
+    //     locations.sort((a, b) => {
+    //       return a.distance - b.distance
+    //     })
+    //
+    //     // Set course visa sponsorship based on provider
+    //     course.visaSponsorship = {}
+    //     course.visaSponsorship.canSponsorSkilledWorkerVisa = course.can_sponsor_skilled_worker_visa
+    //     course.visaSponsorship.canSponsorStudentVisa = course.can_sponsor_student_visa
+    //
+    //     const schools = locations.filter(location => location.code !== '-')
+    //
+    //     course.trainingLocation = locations.find(location => location.code === '-')
+    //
+    //     return {
+    //       course,
+    //       provider,
+    //       schools
+    //     }
+    //   })
+    // }
 
     // Data
-    let results = await Promise.all(courses)
+    // let results = courses // await Promise.all(courses)
 
-    const resultsCount = meta ? meta.count : results.length
+    // const resultsCount = courses.length
 
-    let pageCount = 1
-    if (links.last.match(/page=(\d*)/)) {
-      pageCount = links.last.match(/page=(\d*)/)[1]
-    }
+    // let pageCount = 1
+    // if (links.last.match(/page=(\d*)/)) {
+    //   pageCount = links.last.match(/page=(\d*)/)[1]
+    // }
 
-    const prevPage = links.prev ? (parseInt(page) - 1) : false
-    const nextPage = links.next ? (parseInt(page) + 1) : false
+    const pagination = paginationHelper.getPagination(courses, req.query.page, req.query.limit)
 
-    const searchQuery = page => {
-      const query = {
-        latitude,
-        longitude,
-        page,
-        filter: {
-          send: selectedSend,
-          vacancy: selectedVacancy,
-          studyMode: selectedStudyMode,
-          qualification: selectedQualification,
-          degreeGrade: selectedDegreeGrade,
-          visaSponsorship: selectedVisaSponsorship,
-          fundingType: selectedFundingType,
-          subject: selectedSubject,
-          campaign: selectedCampaign,
-          providerType: selectedProviderType
-        }
-      }
+    courses = paginationHelper.getDataByPage(courses, req.query.page, req.query.limit)
 
-      return qs.stringify(query)
-    }
+    // const prevPage = '' //links.prev ? (parseInt(page) - 1) : false
+    // const nextPage = '' //links.next ? (parseInt(page) + 1) : false
 
-    const pagination = {
-      pages: pageCount,
-      next: nextPage
-        ? {
-            href: `?${searchQuery(nextPage)}`,
-            page: nextPage,
-            text: 'Next page'
-          }
-        : false,
-      previous: prevPage
-        ? {
-            href: `?${searchQuery(prevPage)}`,
-            page: prevPage,
-            text: 'Previous page'
-          }
-        : false
-    }
+    // const searchQuery = page => {
+    //   const query = {
+    //     latitude,
+    //     longitude,
+    //     page,
+    //     filter: {
+    //       send: selectedSend,
+    //       vacancy: selectedVacancy,
+    //       studyMode: selectedStudyMode,
+    //       qualification: selectedQualification,
+    //       degreeGrade: selectedDegreeGrade,
+    //       visaSponsorship: selectedVisaSponsorship,
+    //       fundingType: selectedFundingType,
+    //       subject: selectedSubject,
+    //       campaign: selectedCampaign,
+    //       providerType: selectedProviderType
+    //     }
+    //   }
+    //
+    //   return qs.stringify(query)
+    // }
+    //
+    // const pagination = {
+    //   pages: pageCount,
+    //   next: nextPage
+    //     ? {
+    //         href: `?${searchQuery(nextPage)}`,
+    //         page: nextPage,
+    //         text: 'Next page'
+    //       }
+    //     : false,
+    //   previous: prevPage
+    //     ? {
+    //         href: `?${searchQuery(prevPage)}`,
+    //         page: prevPage,
+    //         text: 'Previous page'
+    //       }
+    //     : false
+    // }
 
     const subjectItemsDisplayLimit = 10
 
     res.render('../views/results/index', {
-      results,
-      resultsCount,
+      courses,
       pagination,
       subjectItems,
       subjectItemsDisplayLimit,
