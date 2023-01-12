@@ -7,8 +7,6 @@ const utils = require('../utils')()
 exports.findMany = (params) => {
   let courses = []
 
-  console.log(params);
-
   // get all accredited bodies
   const organisations = organisationModel.findMany({
     isAccreditedBody: true
@@ -35,13 +33,9 @@ exports.findMany = (params) => {
     })
   })
 
-  console.log('All:', courses.length);
-
   if (params.cycleId) {
     courses = courses.filter(course => course.cycle === params.cycleId)
   }
-
-  console.log('2023:', courses.length);
 
   if (params.subjects) {
     courses = courses.filter(course => {
@@ -53,31 +47,37 @@ exports.findMany = (params) => {
     })
   }
 
-  console.log('Subjects:', courses.length);
-
   if (params.qualification) {
     courses = courses.filter(course => params.qualification.includes(course.qualification))
   }
-
-  console.log('Quals:', courses.length);
 
   if (params.study_type) {
     courses = courses.filter(course => params.study_type.includes(course.studyMode))
   }
 
-  console.log('studyMode:', courses.length);
-
   if (params.funding_type) {
     courses = courses.filter(course => params.funding_type.includes(course.fundingType))
   }
 
-  console.log('fundingType:', courses.length);
+  if (typeof (params.has_vacancies) === 'boolean') {
+    courses = courses.filter(course => course.has_vacancies === params.has_vacancies)
+  }
 
-  // if (typeof (params.has_vacancies) === 'boolean') {
-  //   courses = courses.filter(course => course.hasVacancies === params.has_vacancies)
-  // }
+  if (params.campaign_name) {
+    courses = courses.filter(course => course.campaign_name === params.campaign_name)
+  }
 
-  // console.log('Vacancies:', courses.length);
+  if (params.degree_grade) {
+    courses = courses.filter(course => params.degree_grade.includes(course.degreeGrade))
+  }
+
+  if (params.send_courses) {
+    courses = courses.filter(course => course.isSend === 'yes')
+  }
+
+  if (params.can_sponsor_visa) {
+    courses = courses.filter(course => course.canSponsorSkilledWorkerVisa === 'yes' || course.canSponsorStudentVisa === 'yes')
+  }
 
   return courses
 }
