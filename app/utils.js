@@ -108,6 +108,39 @@ module.exports = () => {
       }
     }
 
+    // Vacancies
+    // B - full time and part time
+    // P - part time
+    // F - full time
+    // empty string - no vacancies
+    course.has_vacancies = false
+
+    course.locations.forEach((location, i) => {
+      if (['F','P','B'].includes(location.vacancies)) {
+        course.has_vacancies = true
+      }
+    })
+
+    // Degree grade
+    // 1 - two_one
+    // 2 - two_two
+    // 3 - third_class
+    // 9 - not_required
+    switch (course.degreeGrade) {
+      case "1":
+        course.degreeGrade = 'two_one'
+        break
+      case "2":
+        course.degreeGrade = 'two_two'
+        break
+      case "3":
+        course.degreeGrade = 'third_class'
+        break
+      default:
+        course.degreeGrade = 'not_required'
+    }
+
+
     // Year range
     course.year_range = `${data.cycle} to ${Number(data.cycle) + 1}`
 
