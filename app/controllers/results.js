@@ -377,8 +377,8 @@ exports.list = async (req, res) => {
 
 
   // sort by settings
-  const sortBy = req.query.sortBy || req.session.data.sortBy || 0
-  const sortByItems = utilsHelper.getCourseSortBySelectOptions(sortBy)
+  const sort = req.query.sort || req.session.data.sort || 0
+  const sortItems = utilsHelper.getCourseSortBySelectOptions(sort)
 
   // pagination settings
   const page = req.query.page || 1
@@ -389,14 +389,14 @@ exports.list = async (req, res) => {
     let courseListResponse
 
     if (q === 'provider') {
-      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, page, perPage, sortBy)
+      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, page, perPage, sort)
     } else if (q === 'location') {
       if (radius) {
         filter.latitude = latitude
         filter.longitude = longitude
         filter.radius = radius
       }
-      courseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sortBy)
+      courseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sort)
     } else {
       // England-wide search
       courseListResponse = await teacherTrainingService.getCourses(filter, sort)
@@ -497,62 +497,9 @@ exports.list = async (req, res) => {
     //   })
     // }
 
-    // Data
-    // let results = courses // await Promise.all(courses)
-
-    // const resultsCount = courses.length
-
-    // let pageCount = 1
-    // if (links.last.match(/page=(\d*)/)) {
-    //   pageCount = links.last.match(/page=(\d*)/)[1]
-    // }
-
     const pagination = paginationHelper.getPagination(courses, req.query.page, req.query.limit)
 
     courses = paginationHelper.getDataByPage(courses, req.query.page, req.query.limit)
-
-    // const prevPage = '' //links.prev ? (parseInt(page) - 1) : false
-    // const nextPage = '' //links.next ? (parseInt(page) + 1) : false
-
-    // const searchQuery = page => {
-    //   const query = {
-    //     latitude,
-    //     longitude,
-    //     page,
-    //     filter: {
-    //       send: selectedSend,
-    //       vacancy: selectedVacancy,
-    //       studyMode: selectedStudyMode,
-    //       qualification: selectedQualification,
-    //       degreeGrade: selectedDegreeGrade,
-    //       visaSponsorship: selectedVisaSponsorship,
-    //       fundingType: selectedFundingType,
-    //       subject: selectedSubject,
-    //       campaign: selectedCampaign,
-    //       providerType: selectedProviderType
-    //     }
-    //   }
-    //
-    //   return qs.stringify(query)
-    // }
-    //
-    // const pagination = {
-    //   pages: pageCount,
-    //   next: nextPage
-    //     ? {
-    //         href: `?${searchQuery(nextPage)}`,
-    //         page: nextPage,
-    //         text: 'Next page'
-    //       }
-    //     : false,
-    //   previous: prevPage
-    //     ? {
-    //         href: `?${searchQuery(prevPage)}`,
-    //         page: prevPage,
-    //         text: 'Previous page'
-    //       }
-    //     : false
-    // }
 
     const subjectItemsDisplayLimit = 10
 
@@ -576,7 +523,8 @@ exports.list = async (req, res) => {
       hasSearch,
       hasSearchPhysics,
       keywords,
-      sortByItems,
+      sort,
+      sortItems,
       actions: {
         view: '/course/',
         filters: {
