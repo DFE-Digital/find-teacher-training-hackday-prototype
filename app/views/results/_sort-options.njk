@@ -6,13 +6,13 @@
   <div class="app-search-results-header">
     <form class="app-search-results-header__sort" action="/results" method="get" accept-charset="utf-8" novalidate>
       {{ govukSelect({
-        id: "sortby",
-        name: "sortBy",
+        id: "sort",
+        name: "sort",
         label: {
           text: "Sorted by",
           classes: "govuk-!-display-inline-block"
         },
-        items: sortByItems,
+        items: sortItems,
         attributes: {
           role: "listbox"
         }
