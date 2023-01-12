@@ -49,8 +49,6 @@
 
         <ul class="app-search-results">
           {% for course in courses %}
-            {{course|dump|safe}}
-
             <li class="app-search-results__item">
               {% set isLocationSearch = (data.q == "location") %}
               {% set isUniversity = (result.provider.provider_type == "university") %}
