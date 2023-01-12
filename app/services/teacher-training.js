@@ -2,7 +2,11 @@ const _ = require('lodash')
 const got = require('got')
 const qs = require('qs')
 const CacheService = require('../services/cache.js')
-const data = require('../data/session-data-defaults')
+// const data = require('../data/session-data-defaults')
+
+const data = { cycle: '2023' }
+
+const courseModel = require('../models/courses')
 
 // const ttl = 60 * 60 * 24 * 30 // cache for 30 days
 const ttl = 0
@@ -33,17 +37,33 @@ const getSortBy = (sortBy) => {
 
 const teacherTrainingService = {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-courses-get
-  async getCourses (filter, page = 1, perPage = 20, sortBy = 0) {
-    const query = {
-      filter,
-      include: 'provider,accredited_body',
-      page,
-      per_page: perPage,
-      sort: getSortBy(sortBy)
-    }
+  async getCourses (filter, sort) {
+    filter.cycleId = data.cycle
+    const courseListResponse = courseModel.findMany(filter)
 
-    const key = `courseListResponse_${data.cycle}-${page}-${perPage}-${JSON.stringify(query)}`
-    const courseListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/courses?${qs.stringify(query)}`).json())
+    courseListResponse.sort((a,b) => {
+      // course name z to a
+      // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
+      if (parseInt(sort) === 1) {
+        return b.name.localeCompare(a.name) || a.trainingProvider.name.localeCompare(b.trainingProvider.name) || a.code.localeCompare(b.code)
+      }
+      // provider name a to z
+      // If identical provider, ordering falls back to the course, if identical courses, ordering falls back to the course code
+      else if (parseInt(sort) === 2) {
+        return a.trainingProvider.name.localeCompare(b.trainingProvider.name) || a.name.localeCompare(b.name) || a.code.localeCompare(b.code)
+      }
+      // provider name z to a
+      // If identical provider, ordering falls back to the course, if identical courses, ordering falls back to the course code
+      else if (parseInt(sort) === 3) {
+        return b.trainingProvider.name.localeCompare(a.trainingProvider.name) || a.name.localeCompare(b.name) || a.code.localeCompare(b.code)
+      }
+      // course name a to z (default)
+      // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
+      else {
+        return a.name.localeCompare(b.name) || a.trainingProvider.name.localeCompare(b.trainingProvider.name) || a.code.localeCompare(b.code)
+      }
+    })
+
     return courseListResponse
   },
 
