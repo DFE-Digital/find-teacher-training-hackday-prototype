@@ -14,23 +14,28 @@ exports.findMany = (params) => {
 
   // put courses into memory
   organisations.forEach((organisation, i) => {
-    const directoryPath = path.join(__dirname, '../data/courses/' + organisation.id)
+    const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
 
-    let documents = fs.readdirSync(directoryPath, 'utf8')
-    // Only get JSON documents
-    documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
+    if (fs.existsSync(directoryPath)) {
+      let documents = fs.readdirSync(directoryPath, 'utf8')
+      // Only get JSON documents
+      documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
 
-    documents.forEach((filename) => {
-      const raw = fs.readFileSync(directoryPath + '/' + filename)
-      let course = JSON.parse(raw)
+      documents.forEach((filename) => {
+        const filePath = `${directoryPath}/${filename}`
 
-      // only get courses that are published (open or closed), aka 'findable'
-      if ([1,4].includes(course.status)) {
-        course = utils.decorateCourse(course)
+        if (fs.existsSync(filePath)) {
+          const raw = fs.readFileSync(filePath)
+          let course = JSON.parse(raw)
 
-        courses.push(course)
-      }
-    })
+          // only get courses that are published (open or closed), aka 'findable'
+          if ([1,4].includes(course.status)) {
+            course = utils.decorateCourse(course)
+            courses.push(course)
+          }
+        }
+      })
+    }
   })
 
   if (params.cycleId) {
