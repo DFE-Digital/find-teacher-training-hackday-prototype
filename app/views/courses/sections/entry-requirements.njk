@@ -3,11 +3,11 @@
   <h3 class="govuk-heading-m">Qualifications needed</h3>
   <div data-qa="course__required_qualifications">
     <p class="govuk-body">
-      {% if course.degree_grade == "two_one" %}
+      {% if course.degreeGrade == "two_one" %}
         An undergraduate degree at class 2:1 or above, or equivalent.
-      {% elif course.degree_grade == "two_two" %}
+      {% elif course.degreeGrade == "two_two" %}
         An undergraduate degree at class 2:2 or above, or equivalent.
-      {% elif course.degree_grade == "third_class" %}
+      {% elif course.degreeGrade == "third_class" %}
         An undergraduate degree, or equivalent. This should be an honours degree (Third or above), or equivalent.
       {% else %}
         An undergraduate degree, or equivalent.
@@ -22,7 +22,7 @@
       {% endif %}
     {% endif %}
 
-    {% if course.level == "secondary" %}
+    {% if course.subjectLevel == "secondary" %}
       {% if course.campaign_name == "engineers_teach_physics" %}
         <p class="govuk-body">Your degree subject should be in engineering, material science or a related subject. {% if course.has_ske %}If your degree is not in physics, or you've not used your subject knowledge in a while, you may be asked to complete a <a class="govuk-link" href="https://getintoteaching.education.gov.uk/train-to-be-a-teacher/subject-knowledge-enhancement">subject knowledge enhancement (SKE) course</a>.{% endif %}</p>
         <p class="govuk-body">If your degree is not in engineering or a related subject, please apply to our physics course.</p>
@@ -31,7 +31,7 @@
       {% endif %}
     {% endif %}
 
-    {% if course.level == "primary" %}
+    {% if course.subjectLevel == "primary" %}
       {% if course.has_ske and "03" in course.subject_codes %}
         <p class="govuk-body">
           If you need to improve your primary mathematics knowledge, you may be asked to complete a <a class="govuk-link" href="https://getintoteaching.education.gov.uk/train-to-be-a-teacher/subject-knowledge-enhancement">subject knowledge enhancement (SKE) course</a>.
@@ -40,7 +40,7 @@
       <p class="govuk-body">
         Grade {{ course.gcse_grade_required }} (C) or above in English, maths and science, or equivalent qualification.
       </p>
-    {% elif course.level == "secondary" %}
+    {% elif course.subjectLevel == "secondary" %}
       <p class="govuk-body">
         Grade {{ course.gcse_grade_required }} (C) or above in English and maths, or equivalent qualification.
       </p>
