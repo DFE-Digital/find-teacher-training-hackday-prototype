@@ -7,6 +7,7 @@ const CacheService = require('../services/cache.js')
 const data = { cycle: '2023' }
 
 const courseModel = require('../models/courses')
+const organisationModel = require('../models/organisations')
 
 // const ttl = 60 * 60 * 24 * 30 // cache for 30 days
 const ttl = 0
@@ -70,17 +71,7 @@ const teacherTrainingService = {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-course_code-get
   async getCourse (providerCode, courseCode) {
     try {
-      const query = {
-        include: 'provider'
-      }
-
-      const key = `courseSingleResponse_${data.cycle}-${providerCode}-${courseCode}-${JSON.stringify(query)}`
-      const courseSingleResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers/${providerCode}/courses/${courseCode}?${qs.stringify(query)}`).json())
-
-      const providerResource = courseSingleResponse.included.find(item => item.type === 'providers')
-      const provider = providerResource.attributes
-      courseSingleResponse.data.attributes.provider = provider
-
+      const courseSingleResponse = courseModel.findOne({providerCode, courseCode})
       return courseSingleResponse
     } catch (error) {
       console.error(error)
@@ -127,9 +118,14 @@ const teacherTrainingService = {
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-get
   async getProvider (providerCode) {
-    const key = `providerSingleResponse_${providerCode}`
-    const providerSingleResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers/${providerCode}`).json())
-    return providerSingleResponse.data.attributes
+    try {
+      const providerSingleResponse = organisationModel.findOne({
+        code: providerCode
+      })
+      return providerSingleResponse
+    } catch (error) {
+      console.error(error)
+    }
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-get
