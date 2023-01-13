@@ -21,6 +21,8 @@ module.exports = () => {
   const utils = {}
 
   utils.decorateCourse = course => {
+    course.subject_codes = course.subjects.map(subject => subject.code)
+
     // Subject knowledge enhancements
     const subjectCodesWithSke = subjects
       .filter(subject => subject.hasSke === true)
