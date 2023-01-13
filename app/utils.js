@@ -26,36 +26,46 @@ module.exports = () => {
       .filter(subject => subject.hasSke === true)
       .map(subject => subject.code)
 
-    course.has_ske = subjectCodesWithSke.some(code => course.subject_codes.includes(code))
-
+    course.has_ske = subjectCodesWithSke.some(code => course.subjects.includes(code))
 
     // International relocation payments
     const subjectCodesWithIrp = subjects
       .filter(subject => subject.hasIrp === true)
       .map(subject => subject.code)
 
-    course.has_irp = subjectCodesWithIrp.some(code => course.subject_codes.includes(code))
+    course.hasIrp = subjectCodesWithIrp.some(code => course.subjects.includes(code))
 
-    // There's a bug in the API where has_bursary and has_scholarship not always
-    // returned. Check for this and set value
-    if (course.has_bursary === undefined) {
-      if (course.bursary_amount === null) {
-        course.has_bursary = false
-      } else {
-        course.has_bursary = true
-      }
+    switch (course.studyMode) {
+      case 'F':
+        course.studyMode = 'full_time'
+        break
+      case 'P':
+        course.studyMode = 'part_time'
+        break
     }
 
-    if (course.has_scholarship === undefined) {
-      if (course.scholarship_amount === null) {
-        course.has_scholarship = false
-      } else {
+    // Bursaries and scholarships
+    const subjectFunding = subjects
+      .find(subject => subject.code === course.subjects[0].code)
+      .funding
+
+    course.has_bursary = false
+    course.has_scholarship = false
+
+    if (subjectFunding) {
+      if (subjectFunding.bursary) {
+        course.bursary_amount = subjectFunding.bursary
+        course.has_bursary = true
+      }
+
+      if (subjectFunding.scholarship) {
+        course.scholarship_amount = subjectFunding.scholarship
         course.has_scholarship = true
       }
     }
 
-    course.has_fees = course.funding_type === 'fee'
-    course.has_salary = course.funding_type === 'salary' || course.funding_type === 'apprenticeship'
+    course.has_fees = course.fundingType === 'fee'
+    course.has_salary = course.fundingType === 'salary' || course.fundingType === 'apprenticeship'
     course.has_bursary_only = course.has_bursary && !course.has_scholarship
     course.has_scholarship_and_bursary = course.has_bursary && course.has_scholarship
 
@@ -70,8 +80,8 @@ module.exports = () => {
     }
 
     if (course.has_scholarship) {
-      if (course.subject_codes.length === 1) {
-        switch (course.subject_codes[0]) {
+      if (course.subjects.length === 1) {
+        switch (course.subjects[0].code) {
           case 'F1': // Chemistry
             course.scholarship_body = 'Royal Society of Chemistry'
             course.scholarship_url = 'https://www.rsc.org/prizes-funding/funding/teacher-training-scholarships/'
@@ -98,21 +108,50 @@ module.exports = () => {
       }
     }
 
-    course.qualification = ''
-    if (course.qualifications.includes('qts')) {
-      if (course.qualifications.includes('pgce')) {
-        course.qualification = 'pgce_with_qts'
-      } else if (course.qualifications.includes('pgde')) {
-        course.qualification = 'pgde_with_qts'
-      } else {
-        course.qualification = 'qts'
+    // Vacancies
+    // B - full time and part time
+    // P - part time
+    // F - full time
+    // empty string - no vacancies
+    course.has_vacancies = false
+
+    course.locations.forEach((location, i) => {
+      if (['F','P','B'].includes(location.vacancies)) {
+        course.has_vacancies = true
       }
-    } else {
-      if (course.qualifications.includes('pgce')) {
-        course.qualification = 'pgce'
-      } else if (course.qualifications.includes('pgde')) {
-        course.qualification = 'pgde'
-      }
+    })
+
+    // Degree grade
+    // 1 - two_one
+    // 2 - two_two
+    // 3 - third_class
+    // 9 - not_required
+    switch (course.degreeGrade) {
+      case "1":
+        course.degreeGrade = 'two_one'
+        break
+      case "2":
+        course.degreeGrade = 'two_two'
+        break
+      case "3":
+        course.degreeGrade = 'third_class'
+        break
+      default:
+        course.degreeGrade = 'not_required'
+    }
+
+    // Visa sponsorship
+    course.visaSponsorship = {
+      canSponsorSkilledWorkerVisa: false,
+      canSponsorStudentVisa: false
+    }
+
+    if (course.canSponsorSkilledWorkerVisa === 'yes') {
+      course.visaSponsorship.canSponsorSkilledWorkerVisa = true
+    }
+
+    if (course.canSponsorStudentVisa === 'yes') {
+      course.visaSponsorship.canSponsorStudentVisa = true
     }
 
     // Year range

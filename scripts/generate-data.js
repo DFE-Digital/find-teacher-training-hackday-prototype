@@ -44,7 +44,7 @@ const remove = (destination) => {
     if (stat && stat.isDirectory()) {
       if (!destinationFile.includes('/app/data/seed')) {
         console.log('Removing directory: ' + destinationFile)
-        del(destinationFile)
+        del.sync(destinationFile)
       }
     } else {
       if (!destinationFile.includes('session-data-defaults.js')) {

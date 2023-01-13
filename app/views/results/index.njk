@@ -1,8 +1,8 @@
 {% extends "_layouts/default.njk" %}
 
 {% set title %}
-  {% if resultsCount > 0 %}
-    {{ resultsCount | numeral('0,0') }} course {{- "s" if resultsCount > 1 }} found
+  {% if pagination.totalCount > 0 %}
+    {{ pagination.totalCount | numeral('0,0') }} course {{- "s" if pagination.totalCount > 1 }} found
   {% else %}
     No courses found
   {% endif %}
@@ -45,42 +45,37 @@
 
       {% include "./_sort-options.njk" %}
 
-      {% if results.length %}
+      {% if courses.length %}
 
         <ul class="app-search-results">
-          {% for result in results %}
+          {% for course in courses %}
             <li class="app-search-results__item">
               {% set isLocationSearch = (data.q == "location") %}
               {% set isUniversity = (result.provider.provider_type == "university") %}
               {% set trainingLocation = result.course.trainingLocation %}
 
               {{ appResultDetail({
-                href: "/providers/" + result.provider.code + "/courses/" + result.course.code,
-                providerName: result.provider.name | markdown("inline"),
-                courseName: result.course.name + " (" + result.course.code + ")",
-                schools: result.schools if not isUniversity and isLocationSearch,
+                href: "/providers/" + course.trainingProvider.code + "/courses/" + course.code,
+                providerName: course.trainingProvider.name | markdown("inline"),
+                courseName: course.name + " (" + course.code + ")",
+                schools: course.schools if not isUniversity and isLocationSearch,
                 trainingLocation: {
                   distance: trainingLocation.distance,
                   address: trainingLocation.address
                 } if trainingLocation and isUniversity and isLocationSearch,
-                accreditedBody: result.course.accredited_body,
-                studyType: result.course.study_mode | getStudyModeLabel,
-                qualification: result.course.qualification | getQualificationLabel('html') | safe,
-                fundingOption: result.course.funding_option,
-                degreeGrade: result.course.degree_grade,
-                visaSponsorship: result.course.visaSponsorship,
-                startDate: result.course.start_date
+                accreditedBody: course.trainingProvider.name,
+                studyType: course.studyMode | getStudyModeLabel,
+                qualification: course.qualification | getQualificationLabel('html') | safe,
+                fundingOption: course.funding_option,
+                degreeGrade: course.degreeGrade,
+                visaSponsorship: course.visaSponsorship
               }) }}
             </li>
           {% endfor %}
         </ul>
 
-        {# {% if pagination %}
+        {% if pagination %}
           {% include "./_pagination.njk" %}
-        {% endif %} #}
-
-        {% if pagination.pages > 1 %}
-          {{ appPagination( pagination ) }}
         {% endif %}
 
       {% else %}

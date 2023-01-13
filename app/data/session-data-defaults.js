@@ -8,7 +8,7 @@ module.exports = {
     longitude: false,
     radius: 50,
     qualification: ['qts','pgce_with_qts','pgde_with_qts','pgce','pgde'],
-    fundingType: 'salary,apprenticeship,fee',
+    fundingType: ['salary','apprenticeship','fee'],
     send: ['exclude'],
     studyMode: ['full_time', 'part_time'],
     subject: [],

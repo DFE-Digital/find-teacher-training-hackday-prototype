@@ -10,7 +10,7 @@
             {{ params.previous.text }}
           </span>
           <span class="govuk-visually-hidden">:</span>
-          <span class="app-pagination__link-label">{{ params.previous.page }} of {{ params.pages }}</span>
+          <span class="app-pagination__link-label">{{ params.previous.page }} of {{ params.pageCount }}</span>
         </a>
       </li>
     {% endif -%}
@@ -25,7 +25,7 @@
             </svg>
           </span>
           <span class="govuk-visually-hidden">:</span>
-          <span class="app-pagination__link-label">{{ params.next.page }} of {{ params.pages }}</span>
+          <span class="app-pagination__link-label">{{ params.next.page }} of {{ params.pageCount }}</span>
         </a>
       </li>
     {% endif -%}
