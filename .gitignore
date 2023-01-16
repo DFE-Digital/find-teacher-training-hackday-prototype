@@ -5,6 +5,7 @@ package-lock.json
 
 # Ignore generated data files
 app/data/age-groups.json
+app/data/age-ranges.json
 app/data/course-sort-options.json
 app/data/degree-grades.json
 app/data/provider-sort-options.json
