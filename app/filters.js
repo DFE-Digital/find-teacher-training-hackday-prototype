@@ -373,6 +373,15 @@ module.exports = (env) => {
     return utilsHelper.getAccreditedBodyLabel(accreditedBodyCode)
   }
 
+  /* ------------------------------------------------------------------
+  utility function to get the accredited body label
+  example: {{ 'include' | getAccreditedBodyLabel }}
+  outputs: "Only show accredited bodies"
+  ------------------------------------------------------------------ */
+  filters.getAgeRangeLabel = (ageRangeCode) => {
+    return utilsHelper.getAgeRangeLabel(ageRangeCode)
+  }
+
 
 
   /* ------------------------------------------------------------------
