@@ -1,3 +1,5 @@
+const ageRangeOptions = require('../data/age-ranges')
+
 const sendOptions = [{
   id: '5289e0bd-830b-46f6-948e-685214651beb',
   name: 'Only show courses with a SEND specialism',
@@ -778,4 +780,14 @@ exports.getSelectedAccreditedBodyItems = (selectedItems, baseHref = '/results') 
   })
 
   return items
+}
+
+exports.getAgeRangeLabel = (ageRangeCode = null) => {
+  let label = ageRangeCode
+
+  if (ageRangeCode) {
+    label = ageRangeOptions.find(ageRange => ageRange.code === ageRangeCode).name
+  }
+
+  return label
 }

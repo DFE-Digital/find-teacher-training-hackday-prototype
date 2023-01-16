@@ -88,16 +88,37 @@ exports.findMany = (params) => {
 }
 
 exports.findOne = (params) => {
+  const courses = []
   let course = {}
 
-  if (params.organisationId && params.courseId) {
-    const directoryPath = path.join(__dirname, '../data/courses/' + params.organisationId)
+  const organisation = organisationModel.findOne({
+    code: params.providerCode
+  })
 
-    const filePath = directoryPath + '/' + params.courseId + '.json'
+  const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
 
-    const raw = fs.readFileSync(filePath)
-    course = JSON.parse(raw)
+  if (fs.existsSync(directoryPath)) {
+    let documents = fs.readdirSync(directoryPath, 'utf8')
+    // Only get JSON documents
+    documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
+
+    documents.forEach((filename) => {
+      const filePath = `${directoryPath}/${filename}`
+
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath)
+        let course = JSON.parse(raw)
+
+        // only get courses that are published (open or closed), aka 'findable'
+        if ([1,4].includes(course.status)) {
+          course = utils.decorateCourse(course)
+          courses.push(course)
+        }
+      }
+    })
   }
+
+  course = courses.find(course => course.code === params.courseCode)
 
   return course
 }

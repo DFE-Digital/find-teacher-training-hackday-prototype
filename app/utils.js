@@ -21,6 +21,8 @@ module.exports = () => {
   const utils = {}
 
   utils.decorateCourse = course => {
+    course.subject_codes = course.subjects.map(subject => subject.code)
+
     // Subject knowledge enhancements
     const subjectCodesWithSke = subjects
       .filter(subject => subject.hasSke === true)
@@ -108,6 +110,9 @@ module.exports = () => {
       }
     }
 
+    course.fees_domestic = course.feesUK
+    course.fees_international = course.feesInternational
+
     // Vacancies
     // B - full time and part time
     // P - part time
@@ -139,6 +144,9 @@ module.exports = () => {
       default:
         course.degreeGrade = 'not_required'
     }
+
+    // GCSEs
+    course.gcse_grade_required = course.english || course.maths
 
     // Visa sponsorship
     course.visaSponsorship = {
