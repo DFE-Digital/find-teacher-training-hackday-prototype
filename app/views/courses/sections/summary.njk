@@ -33,7 +33,7 @@
   {% endif %}
   {% if course.ageRange %}
     <dt class="app-list--description__label">Age range</dt>
-    <dd>{{ course.ageRange }}{{ " - " + course.subjectLevel if course.subjectLevel == "secondary" }}</dd>
+    <dd>{{ course.ageRange | getAgeRangeLabel }}{{ " - " + course.subjectLevel if course.subjectLevel == "secondary" }}</dd>
   {% endif %}
   {% if course.courseLength %}
     <dt class="app-list--description__label">Course length</dt>
