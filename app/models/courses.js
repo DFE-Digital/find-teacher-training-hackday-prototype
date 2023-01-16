@@ -110,10 +110,10 @@ exports.findOne = (params) => {
         let course = JSON.parse(raw)
 
         // only get courses that are published (open or closed), aka 'findable'
-        // if ([1,4].includes(course.status)) {
+        if ([1,4].includes(course.status)) {
           course = utils.decorateCourse(course)
           courses.push(course)
-        // }
+        }
       }
     })
   }
