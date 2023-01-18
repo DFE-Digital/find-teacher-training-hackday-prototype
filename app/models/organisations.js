@@ -17,9 +17,8 @@ exports.findMany = (params) => {
     organisations.push(data)
   })
 
-  // TODO: this is really findOne
-  if (params.code) {
-    organisations = organisations.find(organisation => organisation.code === params.code)
+  if (params.providerCode) {
+    organisations = organisations.find(organisation => organisation.code === params.providerCode)
   }
 
   if (typeof (params.isAccreditedBody) === 'boolean') {
@@ -44,7 +43,7 @@ exports.findOne = (params) => {
     organisations.push(data)
   })
 
-  organisation = organisations.find(organisation => organisation.code === params.code)
+  organisation = organisations.find(organisation => organisation.code === params.providerCode)
 
   return organisation
 }
