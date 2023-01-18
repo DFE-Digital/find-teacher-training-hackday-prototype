@@ -5,6 +5,7 @@ const router = express.Router()
 const courseController = require('./controllers/courses')
 const resultsController = require('./controllers/results')
 const searchController = require('./controllers/search')
+const partnerController = require('./controllers/partner')
 
 const dataController = require('./controllers/data')
 
@@ -87,6 +88,13 @@ router.get('/results/remove-all-filters', resultsController.removeAllFilters)
 router.get('/providers/:providerCode/courses/:courseCode', courseController.show)
 
 router.get('/course/:providerCode/:courseCode', courseController.show)
+
+/// ------------------------------------------------------------------------ ///
+/// COURSES ROUTES
+/// ------------------------------------------------------------------------ ///
+
+router.get('/providers/:providerCode/courses/:courseCode/partners/:partnerCode', partnerController.show)
+
 
 /// ------------------------------------------------------------------------ ///
 /// PROTOTYPE ADMIN
