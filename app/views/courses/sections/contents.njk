@@ -2,7 +2,12 @@
 
 <ul class="govuk-list app-list--dash course-contents govuk-!-margin-bottom-8">
   <li><a class="govuk-link" href="#course-summary">Course summary</a></li>
-  <li><a class="govuk-link" href="#school-placements">School placements</a></li>
+
+  {% if partners.length %}
+    <li><a class="govuk-link" href="#training-partners">Training partners</a></li>
+  {% elif locations.length %}
+    <li><a class="govuk-link" href="#school-placements">School placements</a></li>
+  {% endif %}
   <li><a class="govuk-link" href="#entry-requirements">Entry requirements</a></li>
   {% if course.has_salary %}
     <li><a class="govuk-link" href="#salary">Salary</a></li>

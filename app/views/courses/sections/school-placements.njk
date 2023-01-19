@@ -2,30 +2,30 @@
   <h2 id="school-placements" class="govuk-heading-l">School placements</h2>
 
   {% set whereYouWillTrainHtml %}
-    {% if course.program_type == 'higher_education_programme' and course.provider.provider_code != 'B31' %}
+    {% if course.programType == 'HE' and course.trainingProvider.code != 'B31' %}
       {% include "./school-placements/where-you-will-train-hei.md" %}
-    {% elif course.program_type == 'scitt_programme' and course.provider.provider_code != 'E65' %}
+    {% elif course.programType == 'SC' and course.trainingProvider.code != 'E65' %}
       {% include "./school-placements/where-you-will-train-scitt.md" %}
     {% endif %}
   {% endset %}
 
-  {% if course.program_type in ['higher_education_programme','scitt_programme'] and whereYouWillTrainHtml.length %}
+  {% if course.programType in ['HE','SC'] and whereYouWillTrainHtml.length %}
     {{ appAdvice({
       title: "Where you will train",
       html: whereYouWillTrainHtml | trim | markdown
     }) }}
   {% endif %}
 
-  {% if course.how_school_placements_work %}
-    {{ course.how_school_placements_work | markdown | safe }}
+  {% if course.howSchoolPlacementsWork %}
+    {{ course.howSchoolPlacementsWork | markdown | safe }}
   {% endif %}
 
-  {% if schools.length %}
+  {% if locations.length %}
     <h3 class="govuk-heading-m">Locations</h3>
 
     <p class="govuk-body">You can select one of the following locations when you apply.</p>
 
-    <table class="govuk-table app-table--vertical-align-middle" data-qa="course__choose_a_training_location">
+    <table class="govuk-table app-table--vertical-align-middle">
       <caption class="govuk-visually-hidden">List of locations and vacancies</caption>
       <thead class="govuk-table__head">
       <tr class="govuk-table__row">
@@ -35,12 +35,12 @@
       </thead>
 
       <tbody class="govuk-table__body">
-        {% for school in schools %}
+        {% for location in locations %}
           <tr class="govuk-table__row">
             <td class="govuk-table__cell">
-              <strong>{{ school.name }}</strong>
+              <strong>{{ location.name }}</strong>
               <br>
-              {{ school.address }}
+              {{ location.address | objectToArray | arrayToList(', ',', ') }}
             </td>
             <td class="govuk-table__cell">
               {% if school.has_vacancies %}

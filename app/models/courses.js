@@ -91,34 +91,36 @@ exports.findOne = (params) => {
   const courses = []
   let course = {}
 
-  const organisation = organisationModel.findOne({
-    code: params.providerCode
-  })
-
-  const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
-
-  if (fs.existsSync(directoryPath)) {
-    let documents = fs.readdirSync(directoryPath, 'utf8')
-    // Only get JSON documents
-    documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
-
-    documents.forEach((filename) => {
-      const filePath = `${directoryPath}/${filename}`
-
-      if (fs.existsSync(filePath)) {
-        const raw = fs.readFileSync(filePath)
-        let course = JSON.parse(raw)
-
-        // only get courses that are published (open or closed), aka 'findable'
-        if ([1,4].includes(course.status)) {
-          course = utils.decorateCourse(course)
-          courses.push(course)
-        }
-      }
+  if (params.providerCode && params.courseCode) {
+    const organisation = organisationModel.findOne({
+      providerCode: params.providerCode
     })
-  }
 
-  course = courses.find(course => course.code === params.courseCode)
+    const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
+
+    if (fs.existsSync(directoryPath)) {
+      let documents = fs.readdirSync(directoryPath, 'utf8')
+      // Only get JSON documents
+      documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
+
+      documents.forEach((filename) => {
+        const filePath = `${directoryPath}/${filename}`
+
+        if (fs.existsSync(filePath)) {
+          const raw = fs.readFileSync(filePath)
+          let course = JSON.parse(raw)
+
+          // only get courses that are published (open or closed), aka 'findable'
+          if ([1,4].includes(course.status)) {
+            course = utils.decorateCourse(course)
+            courses.push(course)
+          }
+        }
+      })
+    }
+
+    course = courses.find(course => course.code === params.courseCode)
+  }
 
   return course
 }

@@ -1,0 +1,50 @@
+{% extends "_layouts/default.njk" %}
+
+{% set title = partner.name %}
+{% set caption = provider.name + " - " + course.name + " (" + course.code + ")" %}
+
+{% block pageTitle %}
+{{ title + " - " if title }}{{ caption + " - " if caption }}{{ serviceName }} - GOV.UK
+{% endblock %}
+
+{% block pageNavigation %}
+{{ govukBackLink({
+  text: "Back to course details",
+  href: actions.back
+}) }}
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-xl">
+        {% if caption %}
+          <span class="govuk-caption-xl">{{ caption }}</span>
+        {% endif %}
+        {{ title }}
+      </h1>
+
+    </div>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include "./sections/contents.njk" %}
+
+      {% include "./sections/about-training-provider.njk" %}
+
+      {% include "./sections/school-placements.njk" %}
+
+      {% include "./sections/training-with-disabilities.njk" %}
+
+      {% include "./sections/contact-training-provider.njk" %}
+
+      {% include "./sections/support-and-advice.njk" %}
+
+    </div>
+  </div>
+
+{% endblock %}

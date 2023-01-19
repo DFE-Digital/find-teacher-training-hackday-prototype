@@ -168,6 +168,11 @@ module.exports = () => {
     return course
   }
 
+  utils.decorateLocation = location => {
+
+    return location
+  }
+
   utils.decorateProvider = (provider, courses = []) => {
     // is_accredited_body
     provider.is_accredited_body = !!(provider.provider_type === 'university' || provider.provider_type === 'scitt')

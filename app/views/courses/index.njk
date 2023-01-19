@@ -59,7 +59,11 @@
         {% include "./sections/about-course.njk" %}
       {% endif %}
 
-      {% include "./sections/school-placements.njk" %}
+      {% if partners.length %}
+        {% include "./sections/training-partners.njk" %}
+      {% elif locations.length %}
+        {% include "./sections/school-placements.njk" %}
+      {% endif %}
 
       {% include "./sections/entry-requirements.njk" %}
 
