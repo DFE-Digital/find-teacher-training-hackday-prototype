@@ -1,9 +1,4 @@
-const _ = require('lodash')
-const qs = require('qs')
-const geolib = require('geolib')
-
 const teacherTrainingService = require('../services/teacher-training')
-const utils = require('../utils')()
 
 const paginationHelper = require('../helpers/pagination')
 const utilsHelper = require('../helpers/utils')
@@ -389,7 +384,8 @@ exports.list = async (req, res) => {
     let courseListResponse
 
     if (q === 'provider') {
-      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, page, perPage, sort)
+      console.log('provider');
+      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, sort)
     } else if (q === 'location') {
       if (radius) {
         filter.latitude = latitude
@@ -402,8 +398,6 @@ exports.list = async (req, res) => {
       courseListResponse = await teacherTrainingService.getCourses(filter, sort)
     }
 
-    // const { data, links, meta, included } = courseListResponse
-
     let courses = courseListResponse
 
     if (courses.length > 0) {
@@ -413,89 +407,6 @@ exports.list = async (req, res) => {
       // course.provider = provider
 
     }
-
-    // if (courses.length > 0) {
-    //   const providers = included.filter(include => include.type === 'providers')
-    //
-    //   courses = courses.map(async courseResource => {
-    //     const course = utils.decorateCourse(courseResource.attributes)
-    //     const courseRalationships = courseResource.relationships
-    //
-    //     // Get course provider
-    //     const providerId = courseRalationships.provider.data.id
-    //     const providerResource = providers.find(providerResource => providerResource.id === providerId)
-    //     const provider = utils.decorateProvider(providerResource.attributes)
-    //
-    //     // Get course accredited body
-    //     if (courseRalationships.accredited_body.data) {
-    //       const accreditedBodyId = courseRalationships.accredited_body.data.id
-    //       const accreditedBody = providers.find(providerResource => providerResource.id === accreditedBodyId)
-    //       course.accredited_body = accreditedBody.attributes.name
-    //     }
-    //
-    //     // Get locations
-    //     const LocationListResponse = await teacherTrainingService.getCourseLocations(provider.code, course.code)
-    //     const statuses = LocationListResponse.included.filter(item => item.type === 'location_statuses')
-    //     const locations = LocationListResponse.data.map(location => {
-    //       const { attributes } = location
-    //
-    //       // Vacancy status
-    //       const statusId = location.relationships.location_status.data.id
-    //       const status = statuses.find(status => status.id === statusId)
-    //       attributes.has_vacancies = status.attributes.has_vacancies
-    //
-    //       // Address
-    //       const streetAddress1 = attributes.street_address_1 ? attributes.street_address_1 + ', ' : ''
-    //       const streetAddress2 = attributes.street_address_2 ? attributes.street_address_2 + ', ' : ''
-    //       const city = attributes.city ? attributes.city + ', ' : ''
-    //       const county = attributes.county ? attributes.county + ', ' : ''
-    //       const postcode = attributes.postcode
-    //
-    //       attributes.name = attributes.name.replace(/'/g, '’')
-    //       attributes.address = `${streetAddress1}${streetAddress2}${city}${county}${postcode}`
-    //
-    //       // Distance from search location
-    //       if (q === 'location') {
-    //         let distanceInMeters = 0
-    //         // if there's an error in the location details, we need to ignore
-    //         if (attributes.latitude !== null && attributes.longitude !== null) {
-    //           distanceInMeters = geolib.getDistance({
-    //             latitude,
-    //             longitude
-    //           }, {
-    //             latitude: attributes.latitude,
-    //             longitude: attributes.longitude
-    //           })
-    //         }
-    //
-    //         const distanceInMiles = ((parseInt(distanceInMeters) / 1000) * 0.621371).toFixed(0)
-    //         attributes.distance = parseInt(distanceInMiles)
-    //       }
-    //
-    //       return attributes
-    //     })
-    //
-    //     // Sort locations by disance
-    //     locations.sort((a, b) => {
-    //       return a.distance - b.distance
-    //     })
-    //
-    //     // Set course visa sponsorship based on provider
-    //     course.visaSponsorship = {}
-    //     course.visaSponsorship.canSponsorSkilledWorkerVisa = course.can_sponsor_skilled_worker_visa
-    //     course.visaSponsorship.canSponsorStudentVisa = course.can_sponsor_student_visa
-    //
-    //     const schools = locations.filter(location => location.code !== '-')
-    //
-    //     course.trainingLocation = locations.find(location => location.code === '-')
-    //
-    //     return {
-    //       course,
-    //       provider,
-    //       schools
-    //     }
-    //   })
-    // }
 
     const pagination = paginationHelper.getPagination(courses, req.query.page, req.query.limit)
 
