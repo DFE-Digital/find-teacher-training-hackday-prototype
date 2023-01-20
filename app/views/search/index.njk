@@ -52,7 +52,7 @@
               id: "provider",
               name: "provider",
               label: {
-                text: "Enter a provider name or code"
+                text: "Enter a name"
               },
               value: data.provider.name,
               autocomplete: "off",
@@ -93,7 +93,7 @@
             divider: "or"
           }, {
             value: "provider",
-            text: "By school, university or other training provider",
+            text: "By school, university or training provider",
             checked: (data.q == "provider"),
             conditional: {
               html: providerHtml

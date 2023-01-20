@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 
 const organisationModel = require('./organisations')
-const utils = require('../utils')()
+const courseDecorator = require('../decorators/courses')
 
 exports.findMany = (params) => {
   let courses = []
@@ -30,7 +30,7 @@ exports.findMany = (params) => {
 
           // only get courses that are published (open or closed), aka 'findable'
           if ([1,4].includes(course.status)) {
-            course = utils.decorateCourse(course)
+            course = courseDecorator.decorate(course)
             courses.push(course)
           }
         }
@@ -112,7 +112,7 @@ exports.findOne = (params) => {
 
           // only get courses that are published (open or closed), aka 'findable'
           if ([1,4].includes(course.status)) {
-            course = utils.decorateCourse(course)
+            course = courseDecorator.decorate(course)
             courses.push(course)
           }
         }
