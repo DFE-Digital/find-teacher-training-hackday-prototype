@@ -4,37 +4,18 @@ const qs = require('qs')
 const CacheService = require('../services/cache.js')
 // const data = require('../data/session-data-defaults')
 
-const data = { cycle: '2023' }
+const data = {
+  apiEndpoint: 'https://api.publish-teacher-training-courses.service.gov.uk/api/public/v1',
+  cycle: '2023'
+}
 
 const courseModel = require('../models/courses')
 const organisationModel = require('../models/organisations')
+const providerCourseModel = require('../models/provider-courses')
 
 // const ttl = 60 * 60 * 24 * 30 // cache for 30 days
 const ttl = 0
 const cache = new CacheService(ttl) // Create a new cache service instance
-
-const getSortBy = (sortBy) => {
-  let sort
-
-  // provider name z to a
-  if (parseInt(sortBy) === 1) {
-    sort = '-provider.provider_name,name'
-  }
-  // course name a to z
-  else if (parseInt(sortBy) === 2) {
-    sort = 'name,provider.provider_name'
-  }
-  // course name z to a
-  else if (parseInt(sortBy) === 3) {
-    sort = '-name,provider.provider_name'
-  }
-  // course name a to z (default)
-  else {
-    sort = 'provider.provider_name,name'
-  }
-
-  return sort
-}
 
 const teacherTrainingService = {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-courses-get
@@ -129,17 +110,23 @@ const teacherTrainingService = {
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-get
-  async getProviderCourses (providerCode, filter, page = 1, perPage = 20, sortBy = 0) {
-    const query = {
-      filter,
-      include: 'provider,accredited_body',
-      page,
-      per_page: perPage,
-      sort: getSortBy(sortBy)
-    }
+  async getProviderCourses (providerCode, filter, sort) {
+    filter.cycleId = data.cycle
+    const providerCourseListResponse = providerCourseModel.findMany(providerCode, filter)
 
-    const key = `providerCourseListResponse_${data.cycle}-${providerCode}-${page}-${perPage}-${JSON.stringify(query)}`
-    const providerCourseListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers/${providerCode}/courses?${qs.stringify(query)}`).json())
+    providerCourseListResponse.sort((a,b) => {
+      // course name z to a
+      // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
+      if (parseInt(sort) === 1) {
+        return b.name.localeCompare(a.name) || a.trainingProvider.name.localeCompare(b.trainingProvider.name) || a.code.localeCompare(b.code)
+      }
+      // course name a to z (default)
+      // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
+      else {
+        return a.name.localeCompare(b.name) || a.trainingProvider.name.localeCompare(b.trainingProvider.name) || a.code.localeCompare(b.code)
+      }
+    })
+
     return providerCourseListResponse
   },
 
