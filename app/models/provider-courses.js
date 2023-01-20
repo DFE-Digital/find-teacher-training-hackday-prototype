@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 
 const organisationModel = require('./organisations')
-const decorators = require('../decorators/course')
+const courseDecorator = require('../decorators/course')
 
 exports.findMany = (providerCode, params) => {
   let courses = []
@@ -32,7 +32,7 @@ exports.findMany = (providerCode, params) => {
 
           // only get courses that are published (open or closed), aka 'findable'
           if ([1,4].includes(course.status)) {
-            course = decorators.decorateCourse(course)
+            course = courseDecorator.decorate(course)
             courses.push(course)
           }
         }
