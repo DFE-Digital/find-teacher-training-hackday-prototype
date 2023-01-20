@@ -384,7 +384,6 @@ exports.list = async (req, res) => {
     let courseListResponse
 
     if (q === 'provider') {
-      console.log('provider');
       courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, sort)
     } else if (q === 'location') {
       if (radius) {
