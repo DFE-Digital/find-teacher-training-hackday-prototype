@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 
 const organisationModel = require('./organisations')
-const courseDecorator = require('../decorators/course')
+const courseDecorator = require('../decorators/courses')
 
 exports.findMany = (params) => {
   let courses = []
