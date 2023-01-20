@@ -1,4 +1,4 @@
-<div id="apply" class="govuk-!-margin-bottom-8">
+<div id="apply">
   {% if not data.nearingEndOfCycle %}
 
     {% if course.has_vacancies %}
@@ -8,7 +8,8 @@
         isStartButton: true
       }) }}
 
-      {{ govukInsetText({
+      {{ govukDetails({
+        summaryText: "Applying to the same provider more than once?",
         text: "If you’ve already applied for a course with this training provider, consider if there are other providers who might offer similar courses. Applying to more than one provider can improve your chances of getting a place on a course."
       }) }}
     {% else %}
