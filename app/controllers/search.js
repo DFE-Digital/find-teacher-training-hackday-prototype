@@ -225,5 +225,7 @@ exports.provider_suggestions_json = async (req, res) => {
     return a.name.localeCompare(b.name)
   })
 
+  console.log(results);
+
   res.json(results)
 }

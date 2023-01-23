@@ -10,7 +10,7 @@ const data = {
 }
 
 const courseModel = require('../models/courses')
-const organisationModel = require('../models/organisations')
+const providerModel = require('../models/providers')
 const providerCourseModel = require('../models/provider-courses')
 
 // const ttl = 60 * 60 * 24 * 30 // cache for 30 days
@@ -100,7 +100,7 @@ const teacherTrainingService = {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-get
   async getProvider (providerCode) {
     try {
-      const providerSingleResponse = organisationModel.findOne({
+      const providerSingleResponse = providerModel.findOne({
         code: providerCode
       })
       return providerSingleResponse

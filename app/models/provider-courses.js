@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const organisationModel = require('./organisations')
+const providerModel = require('./providers')
 const courseDecorator = require('../decorators/courses')
 
 exports.findMany = (providerCode, params) => {
@@ -12,7 +12,7 @@ exports.findMany = (providerCode, params) => {
   // 2. find accedited body courses where the training partner is providerCode
 
   if (providerCode) {
-    const organisation = organisationModel.findOne({
+    const organisation = providerModel.findOne({
       providerCode: providerCode
     })
 
