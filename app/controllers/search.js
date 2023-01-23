@@ -2,6 +2,8 @@ const locationSuggestionsService = require('../services/location-suggestions')
 const teacherTrainingService = require('../services/teacher-training')
 const utils = require('../utils')()
 
+const providerSuggestionsModel = require('../models/provider-suggestions')
+
 const utilsHelper = require('../helpers/utils')
 
 exports.search_get = async (req, res) => {
@@ -207,25 +209,14 @@ exports.location_suggestions_json = async (req, res) => {
 exports.provider_suggestions_json = async (req, res) => {
   req.headers['Access-Control-Allow-Origin'] = true
 
-  let providerSuggestionListResponse
-  providerSuggestionListResponse = await teacherTrainingService.getProviderSuggestions(req.query.query)
-
-  let providers = providerSuggestionListResponse.data
+  let providers
+  providers = providerSuggestionsModel.findMany(req.query)
 
   if (providers.length) {
-    providers = providers.map(providerResource => {
-      return providerResource.attributes
+    providers.sort((a, b) => {
+      return a.name.localeCompare(b.name)
     })
   }
 
-  // Results
-  const results = await Promise.all(providers)
-
-  results.sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
-
-  console.log(results);
-
-  res.json(results)
+  res.json(providers)
 }
