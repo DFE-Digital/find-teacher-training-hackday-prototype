@@ -1,14 +1,14 @@
-const organisationModel = require('./organisations')
+const providerModel = require('./providers')
 
 exports.findMany = (params) => {
   let organisations = []
 
   if (params.providerCode) {
-    organisations = organisationModel.findMany({
+    organisations = providerModel.findMany({
       isAccreditedBody: false
     })
 
-    const accreditedProvider = organisationModel.findOne({
+    const accreditedProvider = providerModel.findOne({
       providerCode: params.providerCode
     })
 
@@ -26,7 +26,7 @@ exports.findOne = (params) => {
   let organisation = {}
 
   if (params.partnerCode) {
-    const organisations = organisationModel.findMany({
+    const organisations = providerModel.findMany({
       isAccreditedBody: false
     })
 

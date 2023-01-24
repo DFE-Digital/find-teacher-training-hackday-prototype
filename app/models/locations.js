@@ -1,14 +1,14 @@
 const path = require('path')
 const fs = require('fs')
 
-const organisationModel = require('./organisations')
+const providerModel = require('./providers')
 const utils = require('../utils')()
 
 exports.findMany = (params) => {
   const locations = []
 
   if (params.providerCode) {
-    const organisation = organisationModel.findOne({
+    const organisation = providerModel.findOne({
       providerCode: params.providerCode
     })
 
@@ -44,7 +44,7 @@ exports.findOne = (params) => {
   let location = {}
 
   if (params.providerCode && params.locationCode) {
-    const organisation = organisationModel.findOne({
+    const organisation = providerModel.findOne({
       providerCode: params.providerCode
     })
 

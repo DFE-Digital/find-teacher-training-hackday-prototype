@@ -1,14 +1,14 @@
 const path = require('path')
 const fs = require('fs')
 
-const organisationModel = require('./organisations')
+const providerModel = require('./providers')
 const courseDecorator = require('../decorators/courses')
 
 exports.findMany = (params) => {
   let courses = []
 
   // get all accredited bodies
-  const organisations = organisationModel.findMany({
+  const organisations = providerModel.findMany({
     isAccreditedBody: true
   })
 
@@ -92,7 +92,7 @@ exports.findOne = (params) => {
   let course = {}
 
   if (params.providerCode && params.courseCode) {
-    const organisation = organisationModel.findOne({
+    const organisation = providerModel.findOne({
       providerCode: params.providerCode
     })
 

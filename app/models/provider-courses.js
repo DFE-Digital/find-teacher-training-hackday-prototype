@@ -1,42 +1,78 @@
 const path = require('path')
 const fs = require('fs')
 
-const organisationModel = require('./organisations')
+const providerModel = require('./providers')
+const trainingPartnerModel = require('./training-partners')
+
 const courseDecorator = require('../decorators/courses')
 
 exports.findMany = (providerCode, params) => {
   let courses = []
 
   // 1. find accredited body courses where the accredited body is providerCode
-
-  // 2. find accedited body courses where the training partner is providerCode
-
   if (providerCode) {
-    const organisation = organisationModel.findOne({
+    const organisation = providerModel.findOne({
       providerCode: providerCode
     })
 
-    const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
+    if (organisation.isAccreditedBody) {
+      console.log('accreditedBody',true);
+      const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
 
-    if (fs.existsSync(directoryPath)) {
-      let documents = fs.readdirSync(directoryPath, 'utf8')
-      // Only get JSON documents
-      documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
+      if (fs.existsSync(directoryPath)) {
+        let documents = fs.readdirSync(directoryPath, 'utf8')
+        // Only get JSON documents
+        documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
 
-      documents.forEach((filename) => {
-        const filePath = `${directoryPath}/${filename}`
+        documents.forEach((filename) => {
+          const filePath = `${directoryPath}/${filename}`
 
-        if (fs.existsSync(filePath)) {
-          const raw = fs.readFileSync(filePath)
-          let course = JSON.parse(raw)
+          if (fs.existsSync(filePath)) {
+            const raw = fs.readFileSync(filePath)
+            let course = JSON.parse(raw)
 
-          // only get courses that are published (open or closed), aka 'findable'
-          if ([1,4].includes(course.status)) {
-            course = courseDecorator.decorate(course)
-            courses.push(course)
+            // only get courses that are published (open or closed), aka 'findable'
+            if ([1,4].includes(course.status)) {
+              course = courseDecorator.decorate(course)
+              courses.push(course)
+            }
           }
-        }
+        })
+      }
+    }
+    // 2. find accedited body courses where the training partner is providerCode
+    else {
+      const trainingPartner = providerModel.findOne({
+        providerCode: providerCode
       })
+
+      // get all the courses for the accreditedProviders
+      if (trainingPartner.accreditedBodies?.length) {
+        trainingPartner.accreditedBodies.forEach((accreditedProvider, i) => {
+          const directoryPath = path.join(__dirname, `../data/courses/${accreditedProvider.id}`)
+
+          if (fs.existsSync(directoryPath)) {
+            let documents = fs.readdirSync(directoryPath, 'utf8')
+            // Only get JSON documents
+            documents = documents.filter(doc => doc.match(/.*\.(json)/ig))
+
+            documents.forEach((filename) => {
+              const filePath = `${directoryPath}/${filename}`
+
+              if (fs.existsSync(filePath)) {
+                const raw = fs.readFileSync(filePath)
+                let course = JSON.parse(raw)
+
+                // only get courses that are published (open or closed), aka 'findable'
+                if ([1,4].includes(course.status)) {
+                  course = courseDecorator.decorate(course)
+                  courses.push(course)
+                }
+              }
+            })
+          }
+        })
+      }
     }
 
     if (params.cycleId) {

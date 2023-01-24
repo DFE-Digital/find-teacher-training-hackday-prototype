@@ -2,7 +2,7 @@ const qs = require('qs')
 
 const courseModel = require('../models/courses')
 const locationModel = require('../models/locations')
-const organisationModel = require('../models/organisations')
+const providerModel = require('../models/providers')
 const trainingPartnerModel = require('../models/training-partners')
 
 exports.show = (req, res) => {
@@ -10,7 +10,7 @@ exports.show = (req, res) => {
   const courseCode = req.params.courseCode.toUpperCase()
 
   const course = courseModel.findOne({ providerCode, courseCode })
-  const provider = organisationModel.findOne({ providerCode })
+  const provider = providerModel.findOne({ providerCode })
 
   const locations = locationModel.findMany({ providerCode })
 
