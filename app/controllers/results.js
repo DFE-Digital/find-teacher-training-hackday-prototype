@@ -380,24 +380,26 @@ exports.list = async (req, res) => {
   const perPage = 20
 
   const hasSearchPhysics = !!(selectedSubjects.find(subject => subject.text === 'Physics'))
+
   try {
-    let courseListResponse
+    let courses
 
     if (q === 'provider') {
-      courseListResponse = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, sort)
+      courses = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, sort)
+
+
+
     } else if (q === 'location') {
       if (radius) {
         filter.latitude = latitude
         filter.longitude = longitude
         filter.radius = radius
       }
-      courseListResponse = await teacherTrainingService.getCourses(filter, page, perPage, sort)
+      courses = await teacherTrainingService.getCourses(filter, page, perPage, sort)
     } else {
       // England-wide search
-      courseListResponse = await teacherTrainingService.getCourses(filter, sort)
+      courses = await teacherTrainingService.getCourses(filter, sort)
     }
-
-    let courses = courseListResponse
 
     if (courses.length > 0) {
 
