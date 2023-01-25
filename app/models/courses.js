@@ -3,6 +3,7 @@ const fs = require('fs')
 
 const providerModel = require('./providers')
 const courseDecorator = require('../decorators/courses')
+const locationDecorator = require('../decorators/locations')
 
 exports.findMany = (params) => {
   let courses = []
@@ -31,6 +32,11 @@ exports.findMany = (params) => {
           // only get courses that are published (open or closed), aka 'findable'
           if ([1,4].includes(course.status)) {
             course = courseDecorator.decorate(course)
+
+            // course.locations.forEach((location, i) => {
+            //   location = locationDecorator.decorate(location)
+            // })
+
             courses.push(course)
           }
         }
