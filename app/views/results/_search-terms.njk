@@ -19,7 +19,12 @@
   {% elif data.q == "location" %}
     in <b>{{ data.location }}</b>
   {% elif data.q == "provider" %}
-    from <b>{{ data.provider.name }}</b>
+    {% if data.provider.isAccreditedBody %}
+      from <b>{{ data.provider.name }}</b>
+    {% else %}
+      from accredited providers that partner with <b>{{ data.provider.name }}</b>
+    {% endif %}
+
   {% endif %}
   <a href="/search" class="govuk-link govuk-link--no-visited-state govuk-!-margin-left-4">Change<span class="govuk-visually-hidden"> subject or location</span></a>
 </p>
