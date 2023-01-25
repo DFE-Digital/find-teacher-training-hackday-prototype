@@ -6,7 +6,7 @@ const providerSuggestionsModel = require('../models/provider-suggestions')
 
 const utilsHelper = require('../helpers/utils')
 
-exports.search_get = async (req, res) => {
+exports.search_get = (req, res) => {
   delete req.session.data.filter
   delete req.session.data.provider
   delete req.session.data.q
@@ -76,11 +76,11 @@ exports.search_post = async (req, res) => {
   }
 }
 
-exports.age_groups_get = async (req, res) => {
+exports.age_groups_get = (req, res) => {
   res.render('search/age-groups')
 }
 
-exports.age_groups_post = async (req, res) => {
+exports.age_groups_post = (req, res) => {
   const ageGroup = req.session.data.ageGroup
 
   const errors = []
@@ -112,7 +112,7 @@ exports.age_groups_post = async (req, res) => {
   }
 }
 
-exports.primary_subjects_get = async (req, res) => {
+exports.primary_subjects_get = (req, res) => {
   let selectedSubject
   if (req.session.data.filter?.subject) {
     selectedSubject = req.session.data.filter.subject
@@ -125,7 +125,7 @@ exports.primary_subjects_get = async (req, res) => {
   })
 }
 
-exports.primary_subjects_post = async (req, res) => {
+exports.primary_subjects_post = (req, res) => {
   const errors = []
 
   if (!req.session.data.filter.subject?.length) {
@@ -153,7 +153,7 @@ exports.primary_subjects_post = async (req, res) => {
   }
 }
 
-exports.secondary_subjects_get = async (req, res) => {
+exports.secondary_subjects_get = (req, res) => {
   let selectedSubject
   if (req.session.data.filter?.subject) {
     selectedSubject = req.session.data.filter.subject
@@ -166,7 +166,7 @@ exports.secondary_subjects_get = async (req, res) => {
   })
 }
 
-exports.secondary_subjects_post = async (req, res) => {
+exports.secondary_subjects_post = (req, res) => {
   const errors = []
 
   if (!req.session.data.filter.subject?.length) {
@@ -203,7 +203,7 @@ exports.location_suggestions_json = async (req, res) => {
   res.json(locationSuggestionListResponse)
 }
 
-exports.provider_suggestions_json = async (req, res) => {
+exports.provider_suggestions_json = (req, res) => {
   req.headers['Access-Control-Allow-Origin'] = true
   const providers = providerSuggestionsModel.findMany(req.query)
   res.json(providers)
