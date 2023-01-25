@@ -21,7 +21,14 @@
       <dt class="app-result-detail__key">Training partner</dt>
       <dd class="app-result-detail__value">
         <p class="govuk-body">{{ params.trainingPartner }}</p>
-        <p class="govuk-hint">{{ params.trainingPartners.length - 1 }} other training partner {{- "s" if (params.trainingPartners.length - 1) > 1 }}</p>
+        <p class="govuk-hint">
+          {% if (params.trainingPartners.length - 1) %}
+            {{ params.trainingPartners.length - 1 }} other training partner {{- "s" if (params.trainingPartners.length - 1) > 1 }}
+          {% else %}
+            No other training partners
+          {% endif %}
+
+        </p>
       </dd>
     </div>
   {% endif %}

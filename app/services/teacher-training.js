@@ -1,29 +1,22 @@
-const _ = require('lodash')
-const got = require('got')
-const qs = require('qs')
-const CacheService = require('../services/cache.js')
-// const data = require('../data/session-data-defaults')
-
 const data = {
   apiEndpoint: 'https://api.publish-teacher-training-courses.service.gov.uk/api/public/v1',
   cycle: '2023'
 }
 
 const courseModel = require('../models/courses')
+const courseLocationModel = require('../models/course-locations')
 const providerModel = require('../models/providers')
 const providerCourseModel = require('../models/provider-courses')
-
-// const ttl = 60 * 60 * 24 * 30 // cache for 30 days
-const ttl = 0
-const cache = new CacheService(ttl) // Create a new cache service instance
+const providerLocationModel = require('../models/provider-locations')
+const providerSuggestionsModel = require('../models/provider-suggestions')
 
 const teacherTrainingService = {
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-courses-get
-  async getCourses (filter, sort) {
+  getCourses (filter, sort = null) {
     filter.cycleId = data.cycle
-    const courseListResponse = courseModel.findMany(filter)
+    const courses = courseModel.findMany(filter)
 
-    courseListResponse.sort((a,b) => {
+    courses.sort((a,b) => {
       // course name z to a
       // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
       if (parseInt(sort) === 1) {
@@ -46,75 +39,71 @@ const teacherTrainingService = {
       }
     })
 
-    return courseListResponse
+    return courses
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-course_code-get
-  async getCourse (providerCode, courseCode) {
+  getCourse (providerCode, courseCode) {
     try {
-      const courseSingleResponse = courseModel.findOne({providerCode, courseCode})
-      return courseSingleResponse
+      const course = courseModel.findOne(providerCode, courseCode)
+      return course
     } catch (error) {
       console.error(error)
     }
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-course_code-locations-get
-  async getCourseLocations (providerCode, courseCode) {
-    const query = {
-      include: 'course,location_status,provider'
+  getCourseLocations (providerCode, courseCode) {
+    try {
+      const courseLocations = courseLocationModel.findMany(providerCode, courseCode)
+      return courseLocations
+    } catch (error) {
+      console.error(error)
     }
-
-    const key = `courseLocationListResponse_${data.cycle}-${providerCode}-${courseCode}-${JSON.stringify(query)}`
-    const courseLocationListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers/${providerCode}/courses/${courseCode}/locations?${qs.stringify(query)}`).json())
-    return courseLocationListResponse
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#provider_suggestions-get
-  async getProviderSuggestions (query) {
-    const key = `providerSuggestionListResponse_${query}`
-    const providerSuggestionListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/provider_suggestions?query=${query}`).json())
-    return providerSuggestionListResponse
+  getProviderSuggestions (query) {
+    const providerSuggestions = providerSuggestionsModel.findMany({
+      query
+    })
+    return providerSuggestions
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-get
-  async getProviders (filter, page = 1, perPage = 20, sortBy = 0) {
-    let sort = 'name'
-    if (sortBy === 1) {
-      sort = '-name'
-    }
+  getProviders (filter, sort = null) {
+    const providers = providerModel.findMany({ filter })
 
-    const query = {
-      filter,
-      include: 'recruitment_cycle',
-      page,
-      per_page: perPage,
-      sort
-    }
+    providers.sort((a,b) => {
+      // provider name z to a
+      if (parseInt(sort) === 3) {
+        return b.trainingProvider.name.localeCompare(a.trainingProvider.name)
+      }
+      // provider name a to z (default)
+      else {
+        return a.trainingProvider.name.localeCompare(b.trainingProvider.name)
+      }
+    })
 
-    const key = `providerListResponse_${data.cycle}-${page}-${perPage}-${JSON.stringify(query)}`
-    const providerListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers?${qs.stringify(query)}`).json())
-    return providerListResponse
+    return providers
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-get
-  async getProvider (providerCode) {
+  getProvider (providerCode) {
     try {
-      const providerSingleResponse = providerModel.findOne({
-        code: providerCode
-      })
-      return providerSingleResponse
+      const provider = providerModel.findOne(providerCode)
+      return provider
     } catch (error) {
       console.error(error)
     }
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-courses-get
-  async getProviderCourses (providerCode, filter, sort) {
+  getProviderCourses (providerCode, filter, sort = null) {
     filter.cycleId = data.cycle
-    const providerCourseListResponse = providerCourseModel.findMany(providerCode, filter)
+    const providerCourses = providerCourseModel.findMany(providerCode, filter)
 
-    providerCourseListResponse.sort((a,b) => {
+    providerCourses.sort((a,b) => {
       // course name z to a
       // If identical course, ordering falls back to the provider, if identical providers, ordering falls back to the course code
       if (parseInt(sort) === 1) {
@@ -127,18 +116,17 @@ const teacherTrainingService = {
       }
     })
 
-    return providerCourseListResponse
+    return providerCourses
   },
 
   // https://api.publish-teacher-training-courses.service.gov.uk/docs/api-reference.html#recruitment_cycles-year-providers-provider_code-locations-get
-  async getProviderLocations (providerCode) {
-    const query = {
-      include: 'provider,recruitment_cycle'
+  getProviderLocations (providerCode) {
+    try {
+      const providerLocations = providerLocationModel.findMany(providerCode)
+      return providerLocations
+    } catch (error) {
+      console.error(error)
     }
-
-    const key = `providerLocationListResponse_${data.cycle}-${providerCode}-${JSON.stringify(query)}`
-    const providerLocationListResponse = await cache.get(key, async () => await got(`${data.apiEndpoint}/recruitment_cycles/${data.cycle}/providers/${providerCode}/locations?${qs.stringify(query)}`).json())
-    return providerLocationListResponse
   }
 }
 
