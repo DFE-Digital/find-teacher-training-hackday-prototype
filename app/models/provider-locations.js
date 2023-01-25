@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 
 const providerModel = require('./providers')
-const utils = require('../utils')()
+const locationDecorator = require('../decorators/locations')
 
 exports.findMany = (params) => {
   const locations = []
@@ -61,7 +61,7 @@ exports.findOne = (params) => {
         if (fs.existsSync(filePath)) {
           const raw = fs.readFileSync(filePath)
           let location = JSON.parse(raw)
-          location = utils.decorateLocation(location)
+          location = locationDecorator.decorate(location)
           locations.push(location)
         }
       })
