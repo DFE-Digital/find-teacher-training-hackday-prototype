@@ -1,18 +1,15 @@
 const qs = require('qs')
-
-const courseModel = require('../models/courses')
-const locationModel = require('../models/locations')
-const providerModel = require('../models/providers')
+const teacherTrainingService = require('../services/teacher-training')
 const trainingPartnerModel = require('../models/training-partners')
 
 exports.show = (req, res) => {
   const providerCode = req.params.providerCode.toUpperCase()
   const courseCode = req.params.courseCode.toUpperCase()
 
-  const course = courseModel.findOne({ providerCode, courseCode })
-  const provider = providerModel.findOne({ providerCode })
-
-  const locations = locationModel.findMany({ providerCode })
+  const course = teacherTrainingService.getCourse({ providerCode, courseCode })
+  const provider = teacherTrainingService.getProvider({ providerCode })
+  // TODO: change this to course locations
+  const locations = teacherTrainingService.getProviderLocations({ providerCode })
 
   const partners = trainingPartnerModel.findMany({ providerCode })
 
