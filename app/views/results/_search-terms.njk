@@ -1,8 +1,10 @@
 {% macro _selectedSubjects(params) %}
-  {% for item in params.subjects %}
+  {%- for item in params.subjects -%}
     <b>{{ item.text }}</b>
-    {% if not loop.last %}
+    {%- if loop.index == loop.length-1 %}
       and
+    {% else %}
+      {%- if not loop.last %},{% endif -%}
     {% endif %}
   {% endfor %}
 {% endmacro %}
@@ -24,7 +26,6 @@
     {% else %}
       from accredited providers that partner with <b>{{ data.provider.name }}</b>
     {% endif %}
-
   {% endif %}
-  <a href="/search" class="govuk-link govuk-link--no-visited-state govuk-!-margin-left-4">Change<span class="govuk-visually-hidden"> subject or location</span></a>
+  <a href="/search" class="govuk-link govuk-link--no-visited-state">Change<span class="govuk-visually-hidden"> subject or location</span></a>
 </p>
