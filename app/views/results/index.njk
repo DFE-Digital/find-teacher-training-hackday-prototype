@@ -17,7 +17,7 @@
   {% endif %}
 
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-full">
+    <div class="govuk-grid-column-two-thirds">
 
       {% include "./_search-terms.njk" %}
 
@@ -49,9 +49,12 @@
 
         <ul class="app-search-results">
           {% for course in courses %}
+
             <li class="app-search-results__item">
               {% set isLocationSearch = (data.q == "location") %}
+              {% set isProviderSearch = (data.q == "provider") %}
               {% set isUniversity = (result.provider.provider_type == "university") %}
+              {% set isAccreditedBody = data.provider.isAccreditedBody %}
               {% set trainingLocation = result.course.trainingLocation %}
 
               {{ appResultDetail({
@@ -59,6 +62,8 @@
                 providerName: course.trainingProvider.name | markdown("inline"),
                 courseName: course.name + " (" + course.code + ")",
                 schools: course.schools if not isUniversity and isLocationSearch,
+                trainingPartners: course.trainingPartners if isProviderSearch and not isAccreditedBody,
+                trainingPartner: data.provider.name if isProviderSearch and not isAccreditedBody,
                 trainingLocation: {
                   distance: trainingLocation.distance,
                   address: trainingLocation.address

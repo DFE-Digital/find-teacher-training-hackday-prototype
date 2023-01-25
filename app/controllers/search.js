@@ -60,13 +60,10 @@ exports.search_post = async (req, res) => {
     })
   } else {
     if (q === 'provider') {
-      let providerSuggestionListResponse = await teacherTrainingService.getProviderSuggestions(req.session.data.provider)
-
-      // TODO: if the response contains multiple providers, redirect user to a page
-      // to choose the appropriate provider before returning back to results list
-
-      // get the first provider from the response
-      req.session.data.provider = providerSuggestionListResponse?.data[0]?.attributes
+      let providers = providerSuggestionsModel.findMany({
+        query: req.session.data.provider
+      })
+      req.session.data.provider = providers[0]
     } else if (q === 'location') {
       let locationSingleResponse = await locationSuggestionsService.getLocation(req.session.data.location)
       req.session.data.place = locationSingleResponse
@@ -208,15 +205,6 @@ exports.location_suggestions_json = async (req, res) => {
 
 exports.provider_suggestions_json = async (req, res) => {
   req.headers['Access-Control-Allow-Origin'] = true
-
-  let providers
-  providers = providerSuggestionsModel.findMany(req.query)
-
-  if (providers.length) {
-    providers.sort((a, b) => {
-      return a.name.localeCompare(b.name)
-    })
-  }
-
+  const providers = providerSuggestionsModel.findMany(req.query)
   res.json(providers)
 }

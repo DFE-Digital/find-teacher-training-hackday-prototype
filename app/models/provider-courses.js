@@ -16,7 +16,6 @@ exports.findMany = (providerCode, params) => {
     })
 
     if (organisation.isAccreditedBody) {
-      console.log('accreditedBody',true);
       const directoryPath = path.join(__dirname, `../data/courses/${organisation.id}`)
 
       if (fs.existsSync(directoryPath)) {

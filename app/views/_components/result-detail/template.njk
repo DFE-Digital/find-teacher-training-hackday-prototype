@@ -16,8 +16,17 @@
 </h2>
 
 <dl class="app-result-detail">
-  <div class="app-result-detail__row">
+  {% if params.trainingPartners %}
+    <div class="app-result-detail__row">
+      <dt class="app-result-detail__key">Training partner</dt>
+      <dd class="app-result-detail__value">
+        <p class="govuk-body">{{ params.trainingPartner }}</p>
+        <p class="govuk-hint">{{ params.trainingPartners.length - 1 }} other training partner {{- "s" if (params.trainingPartners.length - 1) > 1 }}</p>
+      </dd>
+    </div>
+  {% endif %}
   {% if params.schools and params.schools | length > 0 %}
+  <div class="app-result-detail__row">
     <dt class="app-result-detail__key">Nearest location</dt>
     <dd class="app-result-detail__value">
       {% if params.schools | length > 0 %}
