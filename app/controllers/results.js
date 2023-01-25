@@ -1,4 +1,5 @@
 const teacherTrainingService = require('../services/teacher-training')
+const trainingPartnerModel = require('../models/training-partners')
 
 const paginationHelper = require('../helpers/pagination')
 const utilsHelper = require('../helpers/utils')
@@ -383,12 +384,12 @@ exports.list = async (req, res) => {
 
   try {
     let courses
-
     if (q === 'provider') {
       courses = await teacherTrainingService.getProviderCourses(req.session.data.provider.code, filter, sort)
-
-
-
+      courses.forEach((course, i) => {
+        const providerCode = course.trainingProvider.code
+        courses[i].trainingPartners = trainingPartnerModel.findMany({ providerCode })
+      })
     } else if (q === 'location') {
       if (radius) {
         filter.latitude = latitude
@@ -399,14 +400,6 @@ exports.list = async (req, res) => {
     } else {
       // England-wide search
       courses = await teacherTrainingService.getCourses(filter, sort)
-    }
-
-    if (courses.length > 0) {
-
-      // decorate provider
-      // const provider = await teacherTrainingService.getProvider()
-      // course.provider = provider
-
     }
 
     const pagination = paginationHelper.getPagination(courses, req.query.page, req.query.limit)
