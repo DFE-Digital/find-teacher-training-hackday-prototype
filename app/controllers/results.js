@@ -396,7 +396,7 @@ exports.list = (req, res) => {
         filter.longitude = longitude
         filter.radius = radius
       }
-      courses = teacherTrainingService.getCourses(filter, page, perPage, sort)
+      courses = teacherTrainingService.getCourses(filter, sort)
     } else {
       // England-wide search
       courses = teacherTrainingService.getCourses(filter, sort)

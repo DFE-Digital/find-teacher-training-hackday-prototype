@@ -19,7 +19,7 @@
   {% if data.q == "england" %}
     in <b>England</b>
   {% elif data.q == "location" %}
-    in <b>{{ data.location }}</b>
+    in or near <b>{{ data.location }}</b>
   {% elif data.q == "provider" %}
     {% if data.provider.isAccreditedBody %}
       from <b>{{ data.provider.name }}</b>
